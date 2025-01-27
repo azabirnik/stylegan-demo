@@ -11,10 +11,17 @@
   - [Backend Service](#backend-service)
     - [Building and Running the Backend](#building-and-running-the-backend)
     - [API Documentation](#api-documentation)
+      - [Request Parameters](#request-parameters)
+      - [Example Request](#example-request)
+      - [Response](#response)
+      - [OpenAPI Documentation](#openapi-documentation)
   - [Frontend Application](#frontend-application)
     - [Building and Running the Frontend](#building-and-running-the-frontend)
-  - [Using the Frontend with a Custom Backend](#using-the-frontend-with-a-custom-backend)
+    - [Using the Frontend Application](#using-the-frontend-application)
+    - [Using the Frontend with a Custom Backend](#using-the-frontend-with-a-custom-backend)
 - [Configuration](#configuration)
+  - [Backend Configuration](#backend-configuration)
+  - [Frontend Configuration](#frontend-configuration)
 - [Makefile Commands](#makefile-commands)
 - [Contributing](#contributing)
 - [License](#license)
@@ -22,13 +29,16 @@
 
 ## Introduction
 
-**StyleGAN-Demo** is a project that deploys a CycleGAN-based image style transfer service using Docker for containerization. It consists of a backend API built with FastAPI and a frontend application built with Streamlit. Users can perform style transfer on images through an intuitive web interface or directly interact with the API for integration into other applications.
+**StyleGAN-Demo** is a project that deploys an image style transfer service using Docker for containerization. It consists of a backend API built with FastAPI and a frontend application built with Streamlit. Users can perform style transfer on images through an intuitive web interface or directly interact with the API for integration into other applications.
+
+The style transfer process takes a **content image** and a **style image** as inputs and produces a new image that blends the content of the first image with the style of the second image using neural style transfer techniques.
 
 ## Features
 
 - **Backend API**:
-  - Performs style transfer using a pre-trained CycleGAN model.
+  - Performs style transfer using Neural Style Transfer with a pre-trained VGG19 model.
   - Utilizes GPU acceleration if available.
+  - Processes both content and style images provided by the user.
   - Provides a RESTful API endpoint for easy integration.
 
 - **Frontend Application**:
@@ -54,8 +64,6 @@ stylegan-demo/
 │   ├── docker-compose.yml
 │   ├── main.py
 │   ├── requirements.txt
-│   └── models/
-│       └── ... (pre-trained models and options)
 └── frontend/
     ├── Dockerfile
     ├── docker-compose.yml
@@ -110,29 +118,30 @@ The backend API provides a `/style-transfer` endpoint for performing style trans
 
 - **Endpoint**: `POST /style-transfer`
 
-#### Request Parameters
+##### Request Parameters
 
 - **Content-Type**: `multipart/form-data`
 - **Parameters**:
   - `content_image` (required): The content image file.
-  - `style_image` (optional): The style image file (currently unused; reserved for future use).
-  - `alpha` (optional): A float between `0.0` and `1.0` indicating the blending factor between the content and the style. Default is `1.0`.
+  - `style_image` (required): The style image file.
+  - `alpha` (optional): A float between `0.0` and `1.0` indicating the blending factor between the content image and the stylized result. Default is `1.0`.
 
-#### Example Request
+##### Example Request
 
 ```bash
 curl -X POST http://localhost:2026/style-transfer \
      -F content_image=@path/to/your/content.jpg \
+     -F style_image=@path/to/your/style.jpg \
      -F alpha=0.8 \
      --output stylized_output.png
 ```
 
-#### Response
+##### Response
 
 - **Success (200 OK)**: Returns the stylized image as a PNG file.
 - **Error (4xx, 5xx)**: Returns an error message in JSON format.
 
-#### OpenAPI Documentation
+##### OpenAPI Documentation
 
 Access the interactive API documentation provided by FastAPI at:
 
@@ -161,11 +170,12 @@ The frontend application will be accessible at `http://localhost:2025`.
 #### Using the Frontend Application
 
 1. Open your web browser and navigate to `http://localhost:2025`.
-2. Upload a content image.
-3. Enter the REST API URL for the backend service (e.g., `http://your-backend-url:2026/style-transfer`).
-4. Adjust the alpha parameter if desired.
-5. Click on **Perform Style Transfer**.
-6. The stylized image will be displayed, and you can download it using the provided button.
+2. Upload a **content image**.
+3. Upload a **style image**.
+4. Enter the **REST API URL** for the backend service (e.g., `http://localhost:2026/style-transfer`).
+5. Adjust the **alpha** parameter if desired.
+6. Click on **Perform Style Transfer**.
+7. The stylized image will be displayed, and you can download it using the provided button.
 
 ### Using the Frontend with a Custom Backend
 
@@ -272,7 +282,7 @@ This project is licensed under the terms of the MIT license. See the [LICENSE](.
 
 ## Acknowledgments
 
-- **CycleGAN and pix2pix Authors**: Special thanks to [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/) and collaborators for the [CycleGAN and pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) project.
+- **Neural Style Transfer**: This project uses neural style transfer techniques based on implementations from the [PyTorch Tutorials](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).
 - **FastAPI**: For providing a modern, fast (high-performance) web framework for building APIs with Python.
 - **Streamlit**: For making it easy to build beautiful web apps for machine learning and data science.
 
