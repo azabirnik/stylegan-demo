@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git python3.12 python3-pip \
+    wget git python3.12 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Set work directory
