@@ -26,7 +26,6 @@ RUN git clone --depth 1 https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix.
 
 # Copy main application files
 COPY main.py .
-COPY models ./models
 
 # Ensure the models directory exists
 RUN mkdir -p models/cyclegan

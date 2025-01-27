@@ -6,10 +6,8 @@ services:
     container_name: style-transfer-api-container
     ports:
       - "2026:8000"
-    volumes:
-      - ./models:/app/models
+    runtime: nvidia
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     restart: unless-stopped
-    gpus: all
