@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from PIL import Image
 import requests
@@ -24,7 +25,7 @@ alpha = st.sidebar.slider(
     "Alpha",
     min_value=0.0,
     max_value=1.0,
-    value=0.5,
+    value=1.0,
     step=0.01,
     help="Adjust the influence of the style image on the content image.",
 )
@@ -32,7 +33,7 @@ alpha = st.sidebar.slider(
 st.sidebar.header("API Configuration")
 api_url = st.sidebar.text_input(
     "REST API URL",
-    value="http://2.tcp.ngrok.io:10018/style-transfer",
+    value=os.environ.get("API_URL", ""),
     help="Enter the URL of the REST API endpoint for style transfer.",
 )
 
