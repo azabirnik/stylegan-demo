@@ -32,7 +32,7 @@ alpha = st.sidebar.slider(
 st.sidebar.header("API Configuration")
 api_url = st.sidebar.text_input(
     "REST API URL",
-    value="http://localhost:8000/style_transfer",
+    value="http://2.tcp.ngrok.io:10018/style-transfer",
     help="Enter the URL of the REST API endpoint for style transfer.",
 )
 
@@ -114,7 +114,7 @@ if content_image_file is not None:
     content_image = load_image(content_image_file)
     if content_image:
         content_image = resize_image(content_image)
-        st.image(content_image, caption="Content Image", use_column_width=True)
+        st.image(content_image, caption="Content Image", use_container_width=True)
 else:
     content_image = None
 
@@ -127,7 +127,7 @@ if style_image_file is not None:
     style_image = load_image(style_image_file)
     if style_image:
         style_image = resize_image(style_image)
-        st.image(style_image, caption="Style Image", use_column_width=True)
+        st.image(style_image, caption="Style Image", use_container_width=True)
 else:
     style_image = None
 
@@ -143,7 +143,7 @@ if st.button("Perform Style Transfer"):
                 output_image = send_request(content_image, style_image, alpha, api_url)
             if output_image:
                 st.success("Style transfer completed!")
-                st.image(output_image, caption="Output Image", use_column_width=True)
+                st.image(output_image, caption="Output Image", use_container_width=True)
                 # [Download button code]
             else:
                 st.error("Failed to get a valid response from the API.")
