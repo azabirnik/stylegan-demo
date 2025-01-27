@@ -26,8 +26,8 @@ decoder.eval()
 vgg.eval()
 
 # Load model weights
-decoder.load_state_dict(torch.load('./pytorch-AdaIN/decoder.pth', map_location=device))
-vgg.load_state_dict(torch.load('./pytorch-AdaIN/vgg_normalised.pth', map_location=device))
+decoder.load_state_dict(torch.load('models/decoder.pth', map_location=device))
+vgg.load_state_dict(torch.load('models/vgg_normalised.pth', map_location=device))
 
 vgg = vgg.to(device)
 decoder = decoder.to(device)
