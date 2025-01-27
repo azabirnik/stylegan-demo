@@ -12,7 +12,4 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     restart: unless-stopped
-    device_requests:
-      - driver: nvidia
-        count: 1
-        capabilities: [gpu]
+    gpus: all
