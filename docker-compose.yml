@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  streamlit:
+    build: .
+    ports:
+      - "2025:8501"  # Maps port 2025 on the host to port 8501 in the container
+    volumes:
+      - .:/app
+    environment:
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
