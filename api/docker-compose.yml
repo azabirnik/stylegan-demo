@@ -8,39 +8,11 @@ services:
       - "2026:8000"
     volumes:
       - ./models:/app/models
-      - ./samples:/app/samples
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu] # Remove or adjust if GPU is not used
-
-  test-inference:
-    image: curlimages/curl:7.83.1
-    container_name: style-transfer-test
-    depends_on:
-      - app
-    volumes:
-      - ./samples:/samples
-      - ./stylized_output:/stylized_output
-    entrypoint: >
-      sh -c "
-        # Wait for the API to be ready
-        until curl -s http://app:8000/docs > /dev/null; do
-          echo 'Waiting for API to be available...'
-          sleep 5
-        done &&
-        echo 'API is up. Performing test inference...' &&
-        curl -X POST http://app:8000/style-transfer \
-          -F content_image=@/samples/content.jpg \
-          -F style_image=@/samples/style.jpg \
-          -F alpha=0.5 \
-          --output /stylized_output/stylized_output.png &&
-        echo 'Stylized image saved to /stylized_output/stylized_output.png'
-      "
-    restart: "no"
-
+    device_requests:
+      - driver: nvidia
+        count: 1
+        capabilities: [gpu]

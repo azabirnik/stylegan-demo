@@ -1,5 +1,4 @@
-
-m fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from PIL import Image
 import io
@@ -8,6 +7,7 @@ import torchvision.transforms as transforms
 import os
 import json
 import asyncio
+import sys
 
 # Define paths
 CYCLEGAN_DIR = "./CycleGAN"
@@ -15,7 +15,6 @@ MODEL_PATH = "./models/cyclegan/latest_net_G_A.pth"
 OPTIONS_PATH = "./models/cyclegan/options.json"
 
 # Add CycleGAN to the system path
-import sys
 sys.path.append(CYCLEGAN_DIR)
 
 # Import CycleGAN utilities
@@ -44,19 +43,29 @@ async def load_model():
     model.setup(test_opts)
     model.eval()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.netG_A.to(device)
+    model.to(device)  # Move all model parameters to device
 
 # Transformation for input images
 transform = transforms.Compose([
-    transforms.Resize(int(256 * 1.12), transforms.InterpolationMode.BICUBIC),
-    transforms.Resize((256, 256), transforms.InterpolationMode.BICUBIC),
+    transforms.Resize(int(256 * 1.12), interpolation=Image.BICUBIC),
+    transforms.Resize((256, 256), interpolation=Image.BICUBIC),
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize((0.5,), (0.5,))
 ])
 
 def perform_style_transfer_sync(content_image: Image.Image, alpha: float = 1.0) -> Image.Image:
+    """
+    Performs style transfer synchronously using the loaded CycleGAN model.
+
+    Parameters:
+        content_image (PIL.Image.Image): The content image to stylize.
+        alpha (float): Blending factor between the content image and the stylized image.
+
+    Returns:
+        PIL.Image.Image: The stylized image.
+    """
     # Preprocess image
-    input_tensor = transform(content_image).unsqueeze(0).to(device)  # Add batch dimension and move to device
+    input_tensor = transform(content_image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         fake = model.netG_A(input_tensor)
@@ -75,33 +84,38 @@ def perform_style_transfer_sync(content_image: Image.Image, alpha: float = 1.0) 
     return stylized_image
 
 async def perform_style_transfer(content_image: Image.Image, alpha: float = 1.0) -> Image.Image:
-    loop = asyncio.get_event_loop()
-    stylized_image = await loop.run_in_executor(None, perform_style_transfer_sync, content_image, alpha)
+    stylized_image = await asyncio.to_thread(perform_style_transfer_sync, content_image, alpha)
     return stylized_image
 
 @app.post("/style-transfer")
 async def style_transfer(
     content_image: UploadFile = File(...),
-    style_image: UploadFile = File(...),  # Note: CycleGAN uses fixed style; style_image can be used to select model
-    alpha: float = Form(...)
+    style_image: UploadFile = File(None),  # Optional, not used currently
+    alpha: float = Form(1.0)
 ):
     # Validate alpha
-    if not (0.0 <= alpha <= 1.0):
-        raise HTTPException(status_code=400, detail="Alpha must be between 0.0 and 1.0")
+    try:
+        alpha = float(alpha)
+        if not (0.0 <= alpha <= 1.0):
+            raise ValueError
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Alpha must be a float between 0.0 and 1.0")
 
     # Load content image
     try:
         content_bytes = await content_image.read()
         content = Image.open(io.BytesIO(content_bytes)).convert("RGB")
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid content image")
 
-    # Load style image (optional: for selecting model based on style)
-    # For simplicity, we'll ignore style_image as CycleGAN requires predefined models
-    # Alternatively, implement a mapping from style_image to a specific CycleGAN model
+    # Load style image (optional, not used)
+    # Currently ignored; reserved for future use
 
     # Perform style transfer asynchronously
-    stylized_image = await perform_style_transfer(content, alpha)
+    try:
+        stylized_image = await perform_style_transfer(content, alpha)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Style transfer failed: {str(e)}")
 
     # Save stylized image to bytes
     buf = io.BytesIO()
@@ -109,4 +123,3 @@ async def style_transfer(
     buf.seek(0)
 
     return StreamingResponse(buf, media_type="image/png")
-

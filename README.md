@@ -1,194 +1,281 @@
-# StyleGAN Demo
+# StyleGAN-Demo
 
-## Overview
+## Table of Contents
 
-**StyleGAN Demo** is a web application that enables users to perform style transfer on images using a GAN-based model. The application consists of a **Streamlit frontend** for uploading images and adjusting parameters, and a **FastAPI backend** that handles the style transfer inference.
+- [Introduction](#introduction)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Backend Service](#backend-service)
+    - [Building and Running the Backend](#building-and-running-the-backend)
+    - [API Documentation](#api-documentation)
+  - [Frontend Application](#frontend-application)
+    - [Building and Running the Frontend](#building-and-running-the-frontend)
+  - [Using the Frontend with a Custom Backend](#using-the-frontend-with-a-custom-backend)
+- [Configuration](#configuration)
+- [Makefile Commands](#makefile-commands)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+## Introduction
+
+**StyleGAN-Demo** is a project that deploys a CycleGAN-based image style transfer service using Docker for containerization. It consists of a backend API built with FastAPI and a frontend application built with Streamlit. Users can perform style transfer on images through an intuitive web interface or directly interact with the API for integration into other applications.
 
 ## Features
 
-- **Image Upload**: Upload a content image and a style image in JPG or PNG formats.
-- **Parameter Adjustment**: Adjust the `alpha` parameter to control the influence of the style on the content.
-- **Asynchronous Processing**: Utilizes `aiohttp` for non-blocking API requests, ensuring a responsive user experience.
-- **Downloadable Results**: View and download the stylized image directly from the application.
+- **Backend API**:
+  - Performs style transfer using a pre-trained CycleGAN model.
+  - Utilizes GPU acceleration if available.
+  - Provides a RESTful API endpoint for easy integration.
+
+- **Frontend Application**:
+  - User-friendly interface built with Streamlit.
+  - Allows users to upload content and style images.
+  - Adjust the blending alpha parameter for style intensity.
+  - Communicates with the backend API via HTTP requests.
+
+- **Dockerized Deployment**:
+  - Easy to set up and run with Docker and Docker Compose.
+  - No need to install dependencies on the host machine.
+  - Supports running frontend and backend on separate machines.
 
 ## Project Structure
 
 ```
 stylegan-demo/
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── app.py
+├── LICENSE
 ├── README.md
-└── LICENSE
+├── Makefile
+├── api/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── main.py
+│   ├── requirements.txt
+│   └── models/
+│       └── ... (pre-trained models and options)
+└── frontend/
+    ├── Dockerfile
+    ├── docker-compose.yml
+    ├── app.py
+    └── requirements.txt
 ```
 
 ## Prerequisites
 
-- [Docker](https://www.docker.com/get-started) installed on your machine.
-- [Docker Compose](https://docs.docker.com/compose/install/) installed.
-- Access to the REST API endpoint for style transfer inference.
+- **Docker**: Install Docker Engine on your machine. [Get Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose**: Install Docker Compose. [Install Docker Compose](https://docs.docker.com/compose/install/)
+- **NVIDIA Container Toolkit**: If you plan to use GPU acceleration, install the NVIDIA Container Toolkit. [Install NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
-## Setup and Installation
+## Installation
 
-1. **Clone the Repository**
+Clone the repository:
 
-   ```bash
-   git clone https://github.com/yourusername/stylegan-demo.git
-   cd stylegan-demo
-   ```
+```bash
+git clone https://github.com/yourusername/stylegan-demo.git
+cd stylegan-demo
+```
 
-2. **Configure the API Endpoint**
-
-   - Open `app.py` and navigate to the sidebar section.
-   - Enter the URL of your REST API endpoint in the **API Configuration** section.
-
-3. **Build and Run with Docker Compose**
-
-   Ensure that your `docker-compose.yml` and `Dockerfile` are correctly set up as per the project structure.
-
-   ```bash
-   sudo docker-compose up --build
-   ```
-
-   This command will build the Docker image and start the Streamlit application on port `2025`.
-
-4. **Access the Application**
-
-   Open your web browser and navigate to:
-
-   ```
-   http://localhost:2025
-   ```
-
-   Replace `localhost` with your server's IP address if running on a remote machine.
+Ensure that you have the necessary permissions and tools installed to build and run Docker containers.
 
 ## Usage
 
-1. **Upload Images**
+You can run the backend and frontend services separately or together. Below are instructions for each.
 
-   - **Content Image**: Click on "Choose a Content Image" to upload the base image you want to stylize.
-   - **Style Image**: Click on "Choose a Style Image" to upload the style you want to apply to the content image.
+### Backend Service
 
-2. **Adjust Parameters**
+#### Building and Running the Backend
 
-   - Use the **Alpha Slider** in the sidebar to set the influence level of the style image on the content image (ranging from `0.0` to `1.0`).
+Navigate to the `api` directory:
 
-3. **Perform Style Transfer**
-
-   - Click on the **"Perform Style Transfer"** button.
-   - Wait for the processing to complete. A spinner will indicate the ongoing process.
-   - Once completed, the stylized image will be displayed along with an option to download it.
-
-4. **Download Output**
-
-   - Click the **"Download Output Image"** button to save the stylized image to your device.
-
-## API Team Requirements
-
-For the team handling the model and API for inference, please refer to the [API Team Requirements](#api-team-requirements-for-style-transfer-inference) section below.
-
-## API Team Requirements for Style Transfer Inference
-
-### 1. `requirements.txt`
-
-```plaintext
-fastapi==0.95.2
-uvicorn==0.22.0
-Pillow==9.5.0
-aiofiles==23.1.0
-torch==2.0.1
-torchvision==0.15.2
+```bash
+cd api
 ```
 
-### 2. API Endpoint Specification
+Build and run the backend service using Docker Compose:
 
-- **Endpoint URL:** `/style-transfer`
-- **Method:** `POST`
-- **Request Payload:**
-  - `content_image`: Image file (multipart/form-data)
-  - `style_image`: Image file (multipart/form-data)
-  - `alpha`: Float (0.0 to 1.0) (multipart/form-data)
-- **Response:**
-  - Stylized image file (`image/png`)
-
-### 3. Example `main.py` Structure
-
-```python
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import StreamingResponse
-from PIL import Image
-import io
-import torch
-# Import your style transfer model here
-
-app = FastAPI()
-
-@app.post("/style-transfer")
-async def style_transfer(
-    content_image: UploadFile = File(...),
-    style_image: UploadFile = File(...),
-    alpha: float = Form(...)
-):
-    # Load and preprocess images
-    content = Image.open(io.BytesIO(await content_image.read())).convert("RGB")
-    style = Image.open(io.BytesIO(await style_image.read())).convert("RGB")
-    
-    # Perform style transfer (replace with your model's inference)
-    stylized_image = perform_style_transfer(content, style, alpha)
-    
-    # Save stylized image to bytes
-    buf = io.BytesIO()
-    stylized_image.save(buf, format="PNG")
-    buf.seek(0)
-    
-    return StreamingResponse(buf, media_type="image/png")
+```bash
+docker-compose up --build -d
 ```
 
-### 4. Docker Setup (Optional)
+**Note:** If using GPU acceleration, ensure that your Docker environment is configured to use GPUs.
 
-#### `Dockerfile`
+The backend API will be accessible at `http://localhost:2026` (or the public IP if running on a remote server).
 
-```dockerfile
-FROM python:3.10-slim
+#### API Documentation
 
-WORKDIR /app
+The backend API provides a `/style-transfer` endpoint for performing style transfer.
 
-COPY requirements.txt .
+- **Endpoint**: `POST /style-transfer`
 
-RUN pip install --no-cache-dir -r requirements.txt
+#### Request Parameters
 
-COPY . .
+- **Content-Type**: `multipart/form-data`
+- **Parameters**:
+  - `content_image` (required): The content image file.
+  - `style_image` (optional): The style image file (currently unused; reserved for future use).
+  - `alpha` (optional): A float between `0.0` and `1.0` indicating the blending factor between the content and the style. Default is `1.0`.
 
-EXPOSE 8000
+#### Example Request
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```bash
+curl -X POST http://localhost:2026/style-transfer \
+     -F content_image=@path/to/your/content.jpg \
+     -F alpha=0.8 \
+     --output stylized_output.png
 ```
 
-### 5. Running the API
+#### Response
 
-- **Without Docker:**
+- **Success (200 OK)**: Returns the stylized image as a PNG file.
+- **Error (4xx, 5xx)**: Returns an error message in JSON format.
 
-  ```bash
-  pip install -r requirements.txt
-  uvicorn main:app --host 0.0.0.0 --port 8000
+#### OpenAPI Documentation
+
+Access the interactive API documentation provided by FastAPI at:
+
+```
+http://localhost:2026/docs
+```
+
+### Frontend Application
+
+#### Building and Running the Frontend
+
+Navigate to the `frontend` directory:
+
+```bash
+cd frontend
+```
+
+Build and run the frontend service using Docker Compose:
+
+```bash
+docker-compose up --build -d
+```
+
+The frontend application will be accessible at `http://localhost:2025`.
+
+#### Using the Frontend Application
+
+1. Open your web browser and navigate to `http://localhost:2025`.
+2. Upload a content image.
+3. Enter the REST API URL for the backend service (e.g., `http://your-backend-url:2026/style-transfer`).
+4. Adjust the alpha parameter if desired.
+5. Click on **Perform Style Transfer**.
+6. The stylized image will be displayed, and you can download it using the provided button.
+
+### Using the Frontend with a Custom Backend
+
+If you have a backend service running elsewhere, you can use the frontend application to interact with it:
+
+1. Ensure your backend service is accessible and the API URL is known.
+2. In the frontend application, enter the backend API URL in the provided input field.
+3. Proceed to perform style transfer as usual.
+
+**Note:** Make sure that any network restrictions or firewalls allow communication between the frontend and backend services.
+
+## Configuration
+
+### Backend Configuration
+
+The backend service configuration is managed via environment variables and Docker settings.
+
+- **Port Mapping**: Adjust the port mapping in `api/docker-compose.yml` if necessary.
+
+  ```yaml
+  ports:
+    - "2026:8000"  # Adjust host port as needed
   ```
 
-- **With Docker:**
+- **GPU Support**: Ensure the `device_requests` section in `api/docker-compose.yml` is properly configured.
+
+  ```yaml
+  device_requests:
+    - driver: nvidia
+      count: 1
+      capabilities: [gpu]
+  ```
+
+### Frontend Configuration
+
+- **Default API URL**: The frontend allows users to input the backend API URL. You can set a default value in `app.py`.
+
+  ```python
+  api_url = st.sidebar.text_input(
+      "REST API URL",
+      value="http://localhost:2026/style-transfer",
+      help="Enter the URL of the REST API endpoint for style transfer.",
+  )
+  ```
+
+- **Port Mapping**: Adjust the port mapping in `frontend/docker-compose.yml` if necessary.
+
+  ```yaml
+  ports:
+    - "2025:8501"  # Adjust host port as needed
+  ```
+
+## Makefile Commands
+
+A `Makefile` is provided at the root of the project to simplify building and running the services.
+
+- **Build and run the frontend service:**
 
   ```bash
-  docker build -t style-transfer-api .
-  docker run -d -p 8000:8000 style-transfer-api
+  make frontend
   ```
+
+- **Stop the frontend service:**
+
+  ```bash
+  make frontend-stop
+  ```
+
+- **Build and run the backend service:**
+
+  ```bash
+  make backend
+  ```
+
+- **Stop the backend service:**
+
+  ```bash
+  make backend-stop
+  ```
+
+- **Display help:**
+
+  ```bash
+  make help
+  ```
+
+**Note**: Ensure you are in the root directory of the project when running `make` commands.
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch with a descriptive name.
+3. Commit your changes with clear messages.
+4. Push your branch to your fork.
+5. Submit a pull request detailing your changes.
+
+Before contributing, please ensure that your code adheres to the project's coding standards and passes any existing tests.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the terms of the MIT license. See the [LICENSE](./LICENSE) file for details.
 
-## Contact
+## Acknowledgments
 
-For any inquiries or support, please contact [your.email@example.com](mailto:your.email@example.com).
+- **CycleGAN and pix2pix Authors**: Special thanks to [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/) and collaborators for the [CycleGAN and pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) project.
+- **FastAPI**: For providing a modern, fast (high-performance) web framework for building APIs with Python.
+- **Streamlit**: For making it easy to build beautiful web apps for machine learning and data science.
+
+---
+
+**Disclaimer**: This project is for educational purposes. The models and code are provided as-is without warranty of any kind.

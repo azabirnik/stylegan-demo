@@ -1,10 +1,7 @@
-fastapi==0.95.2
-uvicorn==0.22.0
-Pillow==9.5.0
-aiofiles==23.1.0
-torch==2.0.1
-torchvision==0.15.2
-numpy==1.23.5
-scikit-image==0.19.3
-opencv-python==4.7.0.72
-
+fastapi
+uvicorn
+Pillow
+torch
+torchvision
+numpy
+scipy
