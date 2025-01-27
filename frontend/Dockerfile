@@ -18,7 +18,7 @@ COPY requirements.txt .
 
 # Upgrade pip and install the Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 # Copy all application files to the working directory
 COPY . /app
