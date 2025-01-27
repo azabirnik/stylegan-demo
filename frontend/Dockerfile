@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libfreetype6-dev \
     libopenjp2-7 \
-    libtiff5 \
     libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
