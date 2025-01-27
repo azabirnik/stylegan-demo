@@ -1,7 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 Pillow
 torch
 torchvision
-numpy
-scipy
