@@ -5,6 +5,7 @@ from PIL import Image
 import io
 import sys
 import os
+import torchvision.transforms as transforms  # Added import statement
 
 # Add AdaIN directory to the system path
 sys.path.append('./pytorch-AdaIN')
