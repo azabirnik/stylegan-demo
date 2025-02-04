@@ -14,7 +14,6 @@
       - [Request Parameters](#request-parameters)
       - [Example Request](#example-request)
       - [Response](#response)
-      - [OpenAPI Documentation](#openapi-documentation)
   - [Frontend Application](#frontend-application)
     - [Building and Running the Frontend](#building-and-running-the-frontend)
     - [Using the Frontend Application](#using-the-frontend-application)
@@ -23,7 +22,6 @@
   - [Backend Configuration](#backend-configuration)
   - [Frontend Configuration](#frontend-configuration)
 - [Makefile Commands](#makefile-commands)
-- [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
@@ -59,6 +57,7 @@ stylegan-demo/
 ├── LICENSE
 ├── README.md
 ├── Makefile
+├── demo.mp4
 ├── api/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
@@ -96,19 +95,11 @@ You can run the backend and frontend services separately or together. Below are 
 
 #### Building and Running the Backend
 
-Navigate to the `api` directory:
-
-```bash
-cd api
-```
-
 Build and run the backend service using Docker Compose:
 
 ```bash
-docker-compose up --build -d
+make backend-build && make backend-run
 ```
-
-**Note:** If using GPU acceleration, ensure that your Docker environment is configured to use GPUs.
 
 The backend API will be accessible at `http://localhost:2026` (or the public IP if running on a remote server).
 
@@ -141,28 +132,16 @@ curl -X POST http://localhost:2026/style-transfer \
 - **Success (200 OK)**: Returns the stylized image as a PNG file.
 - **Error (4xx, 5xx)**: Returns an error message in JSON format.
 
-##### OpenAPI Documentation
-
-Access the interactive API documentation provided by FastAPI at:
-
-```
-http://localhost:2026/docs
-```
 
 ### Frontend Application
 
 #### Building and Running the Frontend
 
-Navigate to the `frontend` directory:
-
-```bash
-cd frontend
-```
 
 Build and run the frontend service using Docker Compose:
 
 ```bash
-docker-compose up --build -d
+make frontend-build && make frontend-run
 ```
 
 The frontend application will be accessible at `http://localhost:2025`.
@@ -173,9 +152,9 @@ The frontend application will be accessible at `http://localhost:2025`.
 2. Upload a **content image**.
 3. Upload a **style image**.
 4. Enter the **REST API URL** for the backend service (e.g., `http://localhost:2026/style-transfer`).
-5. Adjust the **alpha** parameter if desired.
+5. A feature: adjust the **alpha** parameter if desired. 
 6. Click on **Perform Style Transfer**.
-7. The stylized image will be displayed, and you can download it using the provided button.
+7. The stylized image will be displayed, and you can download it.
 
 ### Using the Frontend with a Custom Backend
 
@@ -206,7 +185,7 @@ The backend service configuration is managed via environment variables and Docke
   device_requests:
     - driver: nvidia
       count: 1
-      capabilities: [gpu]
+      capabilities: [ gpu ]
   ```
 
 ### Frontend Configuration
@@ -264,28 +243,15 @@ A `Makefile` is provided at the root of the project to simplify building and run
 
 **Note**: Ensure you are in the root directory of the project when running `make` commands.
 
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch with a descriptive name.
-3. Commit your changes with clear messages.
-4. Push your branch to your fork.
-5. Submit a pull request detailing your changes.
-
-Before contributing, please ensure that your code adheres to the project's coding standards and passes any existing tests.
-
 ## License
 
 This project is licensed under the terms of the MIT license. See the [LICENSE](./LICENSE) file for details.
 
 ## Acknowledgments
 
-- **Neural Style Transfer**: This project uses neural style transfer techniques based on implementations from the [PyTorch Tutorials](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html).
-- **FastAPI**: For providing a modern, fast (high-performance) web framework for building APIs with Python.
-- **Streamlit**: For making it easy to build beautiful web apps for machine learning and data science.
+- **AdaIN**: This project uses neural style the code and the weights from  [pytorch-AdaIN
+](https://github.com/naoto0804/pytorch-AdaIN).
 
 ---
 
-**Disclaimer**: This project is for educational purposes. The models and code are provided as-is without warranty of any kind.
+**Disclaimer**: This project is for educational purposes. The code is provided as-is without warranty of any kind.
