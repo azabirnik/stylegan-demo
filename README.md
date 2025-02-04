@@ -245,7 +245,7 @@ A `Makefile` is provided at the root of the project to simplify building and run
 
 ## License
 
-This project is licensed under the terms of the MIT license. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the terms of the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
 
 ## Acknowledgments
 
